@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZALiM TOURNAMENT CHAMPIONSHIP | REGISTER NOW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f; --bg-secondary: #0d0d18; --bg-card: #111122;
+            --gold: #d4a843; --gold-bright: #f0c860; --gold-dark: #8b6914;
+            --gold-glow: rgba(212,168,67,0.5); --accent-teal: #00e5a0;
+            --text-primary: #e8e8f0; --text-secondary: #b0b0c0; --text-muted: #707088;
+            --border-subtle: #1e1e35; --border-gold: #3a2d10;
+            --danger: #ff4466; --success: #00e5a0;
+            --input-bg: #0c0c1d; --input-border: #252545;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg-primary); color:var(--text-primary); min-height:100vh; overflow-x:hidden; line-height:1.6; }
+        #particles-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+        .main-wrapper { position:relative; z-index:1; }
+        .top-nav {
+            position:sticky; top:0; z-index:100; background:rgba(10,10,20,0.85); backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border-subtle); padding:0 2rem;
+            display:flex; align-items:center; justify-content:space-between; height:64px;
+            flex-wrap: wrap;
+        }
+        .nav-logo-group { display:flex; align-items:center; gap:12px; }
+        .logo-icon {
+            width:42px; height:42px; border-radius:10px;
+            background:linear-gradient(135deg,var(--gold),#e8c450);
+            display:flex; align-items:center; justify-content:center;
+            font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.1rem; color:#0a0a0f;
+            box-shadow:0 0 20px var(--gold-glow);
+        }
+        .nav-brand-text { font-family:'Orbitron',sans-serif; font-weight:700; font-size:1.3rem; letter-spacing:2px; color:#fff; }
+        .nav-links { display:flex; gap:2rem; list-style:none; align-items:center; flex-wrap: wrap; }
+        .nav-links a {
+            color:var(--text-secondary); text-decoration:none;
+            font-family:'Rajdhani',sans-serif; font-weight:600; font-size:1.05rem;
+            letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:color 0.3s;
+        }
+        .nav-links a:hover { color:var(--gold-bright); }
+        .nav-cta { background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:#0a0a0f !important; padding:8px 20px; border-radius:6px; font-weight:700 !important; }
+        .admin-link { color:var(--accent-teal) !important; font-weight:700; }
+        .hero-section { text-align:center; padding:4rem 2rem 3rem; background:radial-gradient(ellipse at center, rgba(212,168,67,0.08) 0%, transparent 70%); border-bottom:1px solid var(--border-subtle); }
+        .hero-badge { display:inline-block; background:rgba(212,168,67,0.12); border:1px solid var(--border-gold); color:var(--gold-bright); padding:6px 18px; border-radius:30px; font-family:'Orbitron',sans-serif; font-size:0.8rem; letter-spacing:3px; margin-bottom:1.5rem; }
+        .hero-title { font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(2rem, 6vw, 5rem); letter-spacing:4px; text-transform:uppercase; background:linear-gradient(180deg,#fff 0%,#d4a843 50%,#8b6914 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:1rem; }
+        .hero-subtitle { font-family:'Rajdhani',sans-serif; font-weight:500; font-size:1.3rem; letter-spacing:6px; color:var(--text-secondary); text-transform:uppercase; }
+        .prize-banner { display:inline-flex; align-items:center; gap:1.5rem; background:rgba(17,17,34,0.8); border:1px solid var(--border-gold); border-radius:16px; padding:1.2rem 2.5rem; backdrop-filter:blur(10px); margin-top:1.5rem; flex-wrap: wrap; justify-content:center; }
+        .prize-amount { font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.5rem; color:var(--gold-bright); text-shadow:0 0 30px var(--gold-glow); }
+        .prize-divider { width:1px; height:40px; background:var(--border-gold); }
+        .content-grid { display:grid; grid-template-columns:1fr 380px; gap:2rem; max-width:1300px; margin:0 auto; padding:2rem; }
+        .form-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:20px; padding:2.5rem; position:relative; }
+        .form-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--gold),var(--accent-teal),var(--gold),transparent); animation:shimmerBorder 4s linear infinite; }
+        @keyframes shimmerBorder { 0%{background-position:-200% 0;} 100%{background-position:200% 0;} }
+        .form-section-title { font-family:'Orbitron',sans-serif; font-weight:600; font-size:0.85rem; letter-spacing:2px; color:var(--gold-bright); text-transform:uppercase; margin-bottom:1.2rem; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+        .form-input,.form-select { width:100%; padding:12px 16px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; color:#fff; font-size:0.95rem; }
+        .submit-btn { width:100%; padding:16px; background:linear-gradient(135deg,#8b6914,#d4a843,#f0c860); border:none; border-radius:10px; color:#0a0a0f; font-family:'Orbitron',sans-serif; font-weight:800; font-size:1.1rem; letter-spacing:3px; cursor:pointer; text-transform:uppercase; transition:0.4s; box-shadow:0 4px 25px rgba(212,168,67,0.3); }
+        .submit-btn:disabled { background:#444 !important; box-shadow:none; cursor:not-allowed; color:#888; }
+        .player-entry { background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:12px; padding:1.2rem; margin-bottom:0.8rem; }
+        .info-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:16px; padding:1.5rem; margin-bottom:1.5rem; }
+        .toast { position:fixed; top:20px; right:20px; z-index:9999; background:#1a1a30; border:1px solid var(--border-gold); border-radius:10px; padding:1rem 1.5rem; display:flex; align-items:center; gap:10px; animation:slideInRight 0.4s ease, fadeOutRight 0.4s ease 3.5s forwards; }
+        @keyframes slideInRight { from{transform:translateX(120%);opacity:0;} to{transform:translateX(0);opacity:1;} }
+        @keyframes fadeOutRight { from{transform:translateX(0);opacity:1;} to{transform:translateX(120%);opacity:0;} }
+        .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:1000; display:flex; align-items:center; justify-content:center; }
+        .modal-content { background:var(--bg-card); border:1px solid var(--border-gold); border-radius:16px; padding:2rem; max-width:400px; width:90%; text-align:center; }
+        .admin-panel-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(5,5,15,0.95); backdrop-filter:blur(10px); z-index:999; overflow-y:auto; padding:2rem; }
+        .admin-panel { max-width:1000px; margin:0 auto; background:var(--bg-card); border-radius:20px; padding:2rem; border:1px solid var(--border-gold); }
+        .btn-close-admin { background:var(--danger); color:white; border:none; padding:10px 25px; border-radius:8px; cursor:pointer; font-family:'Rajdhani',sans-serif; font-weight:700; float:right; }
+        .hidden { display:none !important; }
+        .registration-card { background:linear-gradient(145deg, #1a1a35, #0f0f25); border:1px solid var(--border-subtle); border-left:4px solid var(--gold-bright); border-radius:12px; padding:15px; margin-bottom:12px; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+        @media (max-width: 768px) {
+            .top-nav { flex-direction: column; height: auto; padding: 12px 1rem; }
+            .nav-links { margin-top: 10px; gap: 0.8rem; justify-content: center; }
+            .nav-links a { font-size: 0.85rem; }
+            .hero-section { padding: 2.5rem 1rem 1.5rem; }
+            .hero-title { font-size: clamp(1.8rem, 8vw, 3rem); }
+            .prize-banner { flex-direction: column; padding: 1rem; gap: 0.5rem; }
+            .prize-divider { width: 60%; height: 1px; }
+            .prize-amount { font-size: 1.8rem; }
+            .content-grid { grid-template-columns: 1fr; padding: 1rem; }
+            .form-card { padding: 1.5rem; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+    <div class="main-wrapper">
+        <nav class="top-nav">
+            <div class="nav-logo-group">
+                <div class="logo-icon">Z</div>
+                <span class="nav-brand-text">ZALiM TOURNAMENT</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Rules</a></li>
+                <li><a href="#register-form" class="nav-cta">Register</a></li>
+                <li><a id="adminBtn" class="admin-link">🔐 Admin</a></li>
+            </ul>
+        </nav>
+        <section class="hero-section">
+            <div class="hero-badge">🏆 PAKISTAN CHAMPIONSHIP</div>
+            <h1 class="hero-title">ZALiM TOURNAMENT<br>CHAMPIONSHIP</h1>
+            <p class="hero-subtitle">Only PUBG · Pakistan's Biggest</p>
+            <div class="prize-banner">
+                <div><div class="prize-amount" id="totalPrizeDisplay">$10,000</div><div style="color:var(--text-secondary);">Total Prize</div></div>
+                <div class="prize-divider"></div>
+                <div><div class="prize-amount" id="firstPrizeDisplay" style="font-size:1.6rem;">$5,000</div><div style="color:var(--text-secondary);">1st Place</div></div>
+                <div class="prize-divider"></div>
+                <div><div class="prize-amount" style="font-size:1.2rem;color:var(--success);">FREE</div><div style="color:var(--text-secondary);">Entry</div></div>
+            </div>
+        </section>
+        <div class="content-grid" id="register-form">
+            <div class="form-card">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:2rem; border-bottom:1px solid var(--border-subtle); padding-bottom:1.5rem;">
+                    <span style="font-size:2rem;">📋</span>
+                    <div><div style="font-family:'Orbitron',sans-serif; font-weight:700;">REGISTRATION</div><div style="color:var(--text-muted);" id="modeLabel">Squad · Max 25 Teams</div></div>
+                </div>
+                <div id="dynamicFormContainer"></div>
+            </div>
+            <div class="sidebar">
+                <div class="info-card"><div class="info-card-header">📌 STATUS</div><ul class="info-list"><li><span>Mode</span><span id="sidebarMode" style="color:var(--accent-teal);">Squad</span></li><li><span>Slots Left</span><span id="slotsRemaining" style="color:var(--accent-teal);">25 Teams</span></li></ul></div>
+                <div class="info-card"><div class="info-card-header">📞 CONTACT</div><ul class="info-list"><li>📱 WhatsApp: +92 318 7501635</li><li>📧 huzaifarajpoot407@gmail.com</li></ul></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Password Modal -->
+    <div id="passwordModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>🔐 Admin</h3>
+            <input type="password" id="adminPasswordInput" class="form-input" placeholder="Password"><br>
+            <button id="submitPasswordBtn" class="submit-btn" style="margin-top:1rem;">Login</button>
+            <p id="passwordError" style="color:var(--danger); display:none;">Wrong password</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanelOverlay" class="admin-panel-overlay hidden">
+        <div class="admin-panel">
+            <button id="closeAdminPanel" class="btn-close-admin">❌ Close</button>
+            <h2 style="color:var(--gold-bright);">ADMIN</h2>
+            <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                <select id="modeSelector" class="form-input"><option value="squad">Squad</option><option value="solo">Solo</option></select>
+                <button id="applyModeBtn" class="submit-btn">Apply & Reset</button>
+                <input id="editTotalPrize" class="form-input" placeholder="Total Prize">
+                <input id="editFirstPrize" class="form-input" placeholder="1st Prize">
+                <button id="updatePrizeBtn" class="submit-btn">Update</button>
+                <button id="downloadPdfBtn" class="submit-btn">📥 PDF</button>
+            </div>
+            <hr style="border-color:var(--border-subtle); margin:1rem 0;">
+            <h3>Registered (<span id="adminTeamCount">0</span>/<span id="adminMaxCount">25</span>)</h3>
+            <div id="adminTeamList" style="max-height:55vh;overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== FIREBASE CONFIG (Aapki details yahan hain) ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyoaJJVSOqspUQEIhCY2eJm684ZyLa3yk",
+            authDomain: "zalim-tournament01.firebaseapp.com",
+            databaseURL: "https://zalim-tournament01-default-rtdb.firebaseio.com",
+            projectId: "zalim-tournament01",
+            storageBucket: "zalim-tournament01.firebasestorage.app",
+            messagingSenderId: "1040273694788",
+            appId: "1:1040273694788:web:1e26e7ea4783c122435c11"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ========== PARTICLE BACKGROUND ==========
+        const canvas=document.getElementById('particles-canvas'), ctx=canvas.getContext('2d');
+        let particles=[];
+        function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+        class Particle {
+            constructor(){ this.reset(); }
+            reset(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*1.5+0.5; this.speedX=(Math.random()-0.5)*0.4; this.speedY=(Math.random()-0.5)*0.4; this.opacity=Math.random()*0.5+0.15; }
+            update(){ this.x+=this.speedX; this.y+=this.speedY; if(this.x<0)this.x=canvas.width; if(this.x>canvas.width)this.x=0; if(this.y<0)this.y=canvas.height; if(this.y>canvas.height)this.y=0; }
+            draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fillStyle=`rgba(212,168,67,${this.opacity})`; ctx.fill(); }
+        }
+        function initParticles(){
+            const n=Math.min(Math.floor((canvas.width*canvas.height)/8000),180);
+            particles=[];
+            for(let i=0;i<n;i++) particles.push(new Particle());
+        }
+        function animate(){
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p=>{ p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        resize(); initParticles(); animate();
+        window.addEventListener('resize',()=>{ resize(); initParticles(); });
+
+        // ========== STATE ==========
+        const MODE_SQUAD='squad', MODE_SOLO='solo';
+        let currentMode=MODE_SQUAD;
+        let maxEntries=25;
+        let registeredEntries=[];
+        let prizeInfo={ total:'$10,000', first:'$5,000' };
+
+        // DOM shortcuts
+        const formContainer=document.getElementById('dynamicFormContainer');
+        const modeLabel=document.getElementById('modeLabel');
+        const sidebarMode=document.getElementById('sidebarMode');
+        const slotsRemaining=document.getElementById('slotsRemaining');
+        const adminTeamCount=document.getElementById('adminTeamCount');
+        const adminMaxCount=document.getElementById('adminMaxCount');
+        const adminTeamList=document.getElementById('adminTeamList');
+        const totalPrizeDisplay=document.getElementById('totalPrizeDisplay');
+        const firstPrizeDisplay=document.getElementById('firstPrizeDisplay');
+
+        // ========== FIREBASE LISTENER ==========
+        function startListening() {
+            db.ref('tournament').on('value', snapshot => {
+                const data = snapshot.val() || {};
+                currentMode = data.mode || MODE_SQUAD;
+                registeredEntries = data.entries || [];
+                prizeInfo = data.prizeInfo || { total: '$10,000', first: '$5,000' };
+                updateUI();
+            });
+        }
+
+        function updateUI() {
+            maxEntries = currentMode === MODE_SQUAD ? 25 : 100;
+            adminMaxCount.textContent = maxEntries;
+            modeLabel.textContent = currentMode === MODE_SQUAD ? 'Squad · Max 25 Teams' : 'Solo · Max 100 Players';
+            sidebarMode.textContent = currentMode === MODE_SQUAD ? 'Squad' : 'Solo';
+            totalPrizeDisplay.textContent = prizeInfo.total;
+            firstPrizeDisplay.textContent = prizeInfo.first;
+            const left = maxEntries - registeredEntries.length;
+            slotsRemaining.textContent = left > 0 ? `${left} ${currentMode==='squad'?'Teams':'Players'}` : 'FULL';
+            slotsRemaining.style.color = left > 0 ? 'var(--accent-teal)' : 'var(--danger)';
+            renderAdminList();
+            renderForm();
+        }
+
+        function renderAdminList() {
+            adminTeamCount.textContent = registeredEntries.length;
+            let html = '';
+            if (currentMode === MODE_SQUAD) {
+                registeredEntries.forEach(team => {
+                    const players = team.players.map(p => `${p.ign} (${p.realName})`).join(', ');
+                    html += `<div class="registration-card"><h4>🏴 ${team.teamName}</h4><p>City: ${team.city} | Players: ${team.players.length}</p><p>${players}</p><p>WhatsApp: ${team.whatsapp} | Email: ${team.email}</p></div>`;
+                });
+            } else {
+                registeredEntries.forEach(p => {
+                    html += `<div class="registration-card"><h4>${p.ign} (${p.realName})</h4><p>UID: ${p.uid} | City: ${p.city}</p><p>WhatsApp: ${p.whatsapp} | Email: ${p.email}</p></div>`;
+                });
+            }
+            adminTeamList.innerHTML = html || '<p>No entries</p>';
+        }
+
+        // ========== FORM RENDERING ==========
+        function renderForm() {
+            let html='';
+            if (currentMode === MODE_SQUAD) {
+                html = `<form id="regForm" novalidate>
+                            <div class="form-section-title">🏴 Team</div>
+                            <div class="form-row"><div><label>Team Name*</label><input class="form-input" id="teamName" required></div><div><label>City*</label><input class="form-input" id="city" required></div></div>
+                            <div class="form-section-title">👥 Roster (4-6) with Real Name</div>
+                            <div id="playersContainer"></div>
+                            <button type="button" id="addPlayerBtn" style="border:1px dashed var(--input-border);padding:12px;width:100%;background:transparent;color:var(--text-secondary);">＋ Add Player</button>
+                            <div class="form-row" style="margin-top:1rem;"><div><label>Email*</label><input type="email" class="form-input" id="email" required></div><div><label>WhatsApp*</label><input type="text" class="form-input" id="whatsapp" required></div></div>
+                            <div style="margin:1rem 0;"><label><input type="checkbox" id="agreeTerms" required> I agree</label></div>
+                            <button type="submit" class="submit-btn">⚡ Register</button>
+                        </form>`;
+            } else {
+                html = `<form id="regForm" novalidate>
+                            <div class="form-section-title">👤 Player</div>
+                            <div class="form-row"><div><label>IGN*</label><input class="form-input" id="soloIGN" required></div><div><label>Real Name*</label><input class="form-input" id="soloRealName" required></div></div>
+                            <div class="form-row"><div><label>UID*</label><input class="form-input" id="soloUID" required></div><div><label>City*</label><input class="form-input" id="city" required></div></div>
+                            <div class="form-row"><div><label>Email*</label><input type="email" class="form-input" id="email" required></div><div><label>WhatsApp*</label><input type="text" class="form-input" id="whatsapp" required></div></div>
+                            <div style="margin:1rem 0;"><label><input type="checkbox" id="agreeTerms" required> I agree</label></div>
+                            <button type="submit" class="submit-btn">⚡ Register</button>
+                        </form>`;
+            }
+            formContainer.innerHTML=html;
+            if (currentMode === MODE_SQUAD) initSquadPlayers();
+            attachFormListener();
+        }
+
+        let squadPlayerCount=0;
+        function initSquadPlayers() {
+            const pc=document.getElementById('playersContainer');
+            if(!pc)return;
+            pc.innerHTML=''; squadPlayerCount=0;
+            for(let i=0;i<4;i++){ pc.appendChild(createSquadPlayer(i)); squadPlayerCount++; }
+            document.getElementById('addPlayerBtn').addEventListener('click',()=>{
+                if(squadPlayerCount>=6){ showToast('Max 6','error'); return; }
+                pc.appendChild(createSquadPlayer(squadPlayerCount)); squadPlayerCount++;
+            });
+        }
+        function createSquadPlayer(idx){
+            const d=document.createElement('div'); d.className='player-entry';
+            d.innerHTML=`<div style="display:flex;justify-content:space-between;"><span>PLAYER ${idx+1}</span>${idx>=4?'<button class="btn-remove-squad">✕</button>':''}</div>
+                        <div class="form-row"><input class="form-input squad-ign" placeholder="IGN" required><input class="form-input squad-realname" placeholder="Real Name" required></div>
+                        <div class="form-row"><input class="form-input squad-uid" placeholder="UID" required></div>`;
+            if(idx>=4) d.querySelector('.btn-remove-squad').addEventListener('click',()=>{
+                if(squadPlayerCount>4){ d.remove(); squadPlayerCount--; }
+                else showToast('Min 4','error');
+            });
+            return d;
+        }
+
+        function attachFormListener(){
+            const form=document.getElementById('regForm');
+            if(!form)return;
+            form.addEventListener('submit',async function(e){
+                e.preventDefault();
+                if(registeredEntries.length>=maxEntries){ showToast('Full!','error'); return; }
+                if(!document.getElementById('agreeTerms').checked){ showToast('Agree','error'); return; }
+                const email=document.getElementById('email').value.trim();
+                const whatsapp=document.getElementById('whatsapp').value.trim();
+                const city=document.getElementById('city').value.trim();
+                if(!email||!whatsapp||!city){ showToast('Fill all','error'); return; }
+                if(currentMode===MODE_SQUAD){
+                    const teamName=document.getElementById('teamName').value.trim();
+                    if(!teamName){ showToast('Team name','error'); return; }
+                    const entries=document.querySelectorAll('#playersContainer .player-entry');
+                    if(entries.length<4){ showToast('Min 4 players','error'); return; }
+                    const players=[]; let ok=true;
+                    entries.forEach(pe=>{
+                        const ign=pe.querySelector('.squad-ign').value.trim();
+                        const realName=pe.querySelector('.squad-realname').value.trim();
+                        const uid=pe.querySelector('.squad-uid').value.trim();
+                        if(!ign||!realName||!uid) ok=false;
+                        players.push({ign,realName,uid});
+                    });
+                    if(!ok){ showToast('Complete all players','error'); return; }
+                    registeredEntries.push({teamName,city,players,email,whatsapp});
+                }else{
+                    const ign=document.getElementById('soloIGN').value.trim();
+                    const realName=document.getElementById('soloRealName').value.trim();
+                    const uid=document.getElementById('soloUID').value.trim();
+                    if(!ign||!realName||!uid){ showToast('Fill all','error'); return; }
+                    registeredEntries.push({ign,realName,uid,city,email,whatsapp});
+                }
+                await db.ref('tournament').set({
+                    mode: currentMode,
+                    entries: registeredEntries,
+                    prizeInfo: prizeInfo
+                });
+                showToast('Registered!','success');
+                form.reset();
+                if(currentMode===MODE_SQUAD){ document.getElementById('playersContainer').innerHTML=''; squadPlayerCount=0; initSquadPlayers(); }
+                if(registeredEntries.length>=maxEntries){
+                    document.querySelector('.submit-btn').disabled=true;
+                    document.querySelector('.submit-btn').textContent='🚫 FULL';
+                }
+            });
+        }
+
+        function showToast(msg,type='success'){
+            const old=document.querySelector('.toast'); if(old) old.remove();
+            const t=document.createElement('div'); t.className=`toast ${type}`;
+            t.innerHTML=`<span>${type==='success'?'✅':'❌'}</span> ${msg}`;
+            document.body.appendChild(t); setTimeout(()=>t.remove(),4000);
+        }
+
+        // ========== ADMIN PANEL ==========
+        const ADMIN_PASS='ztcadmin123';
+        document.getElementById('adminBtn').addEventListener('click',()=>document.getElementById('passwordModal').classList.remove('hidden'));
+        document.getElementById('submitPasswordBtn').addEventListener('click',()=>{
+            if(document.getElementById('adminPasswordInput').value===ADMIN_PASS){
+                document.getElementById('passwordModal').classList.add('hidden');
+                document.getElementById('adminPanelOverlay').classList.remove('hidden');
+                document.getElementById('modeSelector').value=currentMode;
+                document.getElementById('editTotalPrize').value=prizeInfo.total;
+                document.getElementById('editFirstPrize').value=prizeInfo.first;
+                document.getElementById('passwordError').style.display='none';
+            }else{
+                document.getElementById('passwordError').style.display='block';
+            }
+        });
+        document.getElementById('closeAdminPanel').addEventListener('click',()=>document.getElementById('adminPanelOverlay').classList.add('hidden'));
+        document.getElementById('applyModeBtn').addEventListener('click',async ()=>{
+            const m=document.getElementById('modeSelector').value;
+            if(m!==currentMode && registeredEntries.length && !confirm('Clear all entries?')) return;
+            currentMode=m;
+            registeredEntries=[];
+            await db.ref('tournament').set({mode:currentMode,entries:[],prizeInfo:prizeInfo});
+        });
+        document.getElementById('updatePrizeBtn').addEventListener('click',async ()=>{
+            prizeInfo.total=document.getElementById('editTotalPrize').value||prizeInfo.total;
+            prizeInfo.first=document.getElementById('editFirstPrize').value||prizeInfo.first;
+            await db.ref('tournament/prizeInfo').set(prizeInfo);
+            showToast('Prizes updated','success');
+        });
+        document.getElementById('downloadPdfBtn').addEventListener('click',()=>{
+            const {jsPDF}=window.jspdf;
+            const doc=new jsPDF();
+            let y=20;
+            doc.setFontSize(18); doc.setTextColor(200,150,50);
+            doc.text('ZALiM TOURNAMENT',105,y,{align:'center'});
+            y+=10; doc.setFontSize(12); doc.setTextColor(100);
+            doc.text(`Mode: ${currentMode} | Total: ${registeredEntries.length}`,105,y,{align:'center'});
+            y+=12;
+            if(currentMode===MODE_SQUAD){
+                registeredEntries.forEach(t=>{
+                    doc.setFontSize(13); doc.setTextColor(40);
+                    doc.text(t.teamName,14,y); y+=6;
+                    doc.setFontSize(10);
+                    doc.text(`City: ${t.city} | Players: ${t.players.map(p=>p.ign).join(', ')}`,14,y); y+=8;
+                });
+            }else{
+                registeredEntries.forEach(p=>{
+                    doc.setFontSize(13); doc.text(`${p.ign} (${p.realName})`,14,y); y+=6;
+                    doc.setFontSize(10); doc.text(`UID: ${p.uid} | City: ${p.city}`,14,y); y+=8;
+                });
+            }
+            doc.save('ZALiM_List.pdf');
+        });
+
+        // ========== START ==========
+        startListening();
+    </script>
+</body>
+</html>
